@@ -71,7 +71,7 @@ if __name__ == "__main__":
         files = os.listdir("{}/{}".format(args.dir, dir))
         for f in files:
           ff_src = "{}/{}/{}".format(args.dir, dir, f)
-          ff_dst = "{}/{}_{}".format(today_folder, dir, f)
+          ff_dst = "{}/{}---{}".format(today_folder, dir, f)
           stats["files_copied"] = stats["files_copied"] + 1
           if args.test:
             logger.info("would copy: {} -> {} : but testing".format(ff_src, ff_dst))
