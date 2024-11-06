@@ -5,6 +5,7 @@ import os
 import re
 import logging
 import argparse
+import shutil
 from datetime import datetime
 from pathlib import Path
 
@@ -36,7 +37,7 @@ if __name__ == "__main__":
   logger.info("{} exists: {}".format(today_folder, today_folder_exists))
   if today_folder_exists:
     if args.test:
-      logger.info("would remove files: {}".format(today_folder))
+      logger.info("would remove files: {} : but testing".format(today_folder))
     else:
       logger.info("removing existing files: {}".format(today_folder))
       files = os.listdir(today_folder)
@@ -63,13 +64,23 @@ if __name__ == "__main__":
 
     is_good = re.match(re_good_folder, dir)
     if is_good:
-      logger.info("dir is good: {}".format(dir))
+      logger.debug("dir is good: {}".format(dir))
       is_correct = re.match(re_correct_folder, dir)
       if is_correct:
-        logger.info("dir is correct: {}".format(dir))
-        # TODO copy files into today folder with format: folder_filename
+        logger.debug("dir is correct: {}".format(dir))
+        files = os.listdir("{}/{}".format(args.dir, dir))
+        for f in files:
+          ff_src = "{}/{}/{}".format(args.dir, dir, f)
+          ff_dst = "{}/{}_{}".format(today_folder, dir, f)
+          stats["files_copied"] = stats["files_copied"] + 1
+          if args.test:
+            logger.info("would copy: {} -> {} : but testing".format(ff_src, ff_dst))
+          else:
+            logger.info("copying: {} -> {}".format(ff_src, ff_dst))
+            shutil.copyfile(ff_src, ff_dst)
+
         #
     else:
-      logger.warning("dir is bad: {} : skipping".format(dir))
+      logger.debug("dir is bad: {} : skipping".format(dir))
 
   logger.info(stats)
