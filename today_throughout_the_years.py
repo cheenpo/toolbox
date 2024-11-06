@@ -21,6 +21,7 @@ if __name__ == "__main__":
   parser.add_argument("dir", action="store", help="directory to work in")
   parser.add_argument('--debug', action='store_true', default=False)
   parser.add_argument('--test', action='store_true', default=False)
+  parser.add_argument('--clean', action='store_true', default=False)
   args = parser.parse_args()
 
   logging_level = logging.INFO
@@ -29,14 +30,17 @@ if __name__ == "__main__":
   logging.basicConfig(level=logging_level, stream=sys.stdout, format='%(levelname)s %(asctime)s %(message)s', datefmt='%Y-%d-%m %H:%M:%S')
   logger = logging.getLogger(__name__)
 
-  logger.info("creating today from: {}, test: {}, debug: {}".format(args.dir, args.test, args.debug))
+  stats = {"files_copied": 0, "stats_fake": args.test}
+  logger.info("creating today from: {}, test: {}, debug: {}, clean: {}".format(args.dir, args.test, args.debug, args.clean))
   #
   home_folder = Path.home()
   today_folder = "{}/Downloads/today".format(home_folder)
   today_folder_exists = os.path.isdir(today_folder)
   logger.info("{} exists: {}".format(today_folder, today_folder_exists))
   if today_folder_exists:
-    if args.test:
+    if args.clean:
+      logger.info("keep files: {} : cleaning".format(today_folder))
+    elif args.test:
       logger.info("would remove files: {} : but testing".format(today_folder))
     else:
       logger.info("removing existing files: {}".format(today_folder))
@@ -50,8 +54,22 @@ if __name__ == "__main__":
     os.mkdir(today_folder)
   #
 
+  # clean operation
+  if args.clean:
+    #
+    # TODO -clean folder needs to exist
+    clean_folder = "{}_clean".format(args.dir)
+    clean_folder_exists = os.path.isdir(clean_folder)
+    # TODO parse files from today_folder to get folder and filename
+    ##      - check/create folder in clean_folder
+    ##      - copy file from today to clean_folder/folder/filename
+    #
+    ## clean operation needs to kill after
+    logger.info(stats)
+    sys.exit(0)
   #
-  stats = {"files_copied": 0, "stats_fake": args.test}
+
+  # normal operation
   re_good_folder = r"^\d\d\d\d-\d\d-\d\d$"
   day_of_year = datetime.today().strftime("%m-%d")
   re_correct_folder = r"^\d\d\d\d-{}$".format(day_of_year)
