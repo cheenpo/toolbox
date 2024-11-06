@@ -30,7 +30,7 @@ if __name__ == "__main__":
   logging.basicConfig(level=logging_level, stream=sys.stdout, format='%(levelname)s %(asctime)s %(message)s', datefmt='%Y-%d-%m %H:%M:%S')
   logger = logging.getLogger(__name__)
 
-  stats = {"files_copied": 0, "stats_fake": args.test}
+  stats = {"files_copied": 0, "files_moved": 0, "stats_fake": args.test}
   logger.info("creating today from: {}, test: {}, debug: {}, clean: {}".format(args.dir, args.test, args.debug, args.clean))
   #
   home_folder = Path.home()
@@ -57,12 +57,35 @@ if __name__ == "__main__":
   # clean operation
   if args.clean:
     #
-    # TODO -clean folder needs to exist
     clean_folder = "{}_clean".format(args.dir)
     clean_folder_exists = os.path.isdir(clean_folder)
-    # TODO parse files from today_folder to get folder and filename
-    ##      - check/create folder in clean_folder
-    ##      - copy file from today to clean_folder/folder/filename
+    files = os.listdir(today_folder)
+    for f in files:
+      ff_src = "{}/{}".format(today_folder, f)
+      if f[0] == ".":
+        logger.warning("garbage file: {}".format(ff_src))
+        if args.test:
+          logger.info("would remove file: {} : but testing".format(ff_src))
+        else:
+          logger.warning("removing: {}".format(ff_src))
+          os.remove(ff_src)
+      else:
+        f_split = f.split("---")
+        dst_folder = f_split[0]
+        dst_filename = f_split[1]
+        dst_ffolder = "{}/{}".format(clean_folder, dst_folder)
+        ff_dst = "{}/{}".format(dst_ffolder, dst_filename)
+        dst_folder_exists = os.path.isdir(dst_ffolder)
+        if not dst_folder_exists:
+          logger.info("creating folder: {}".format(dst_ffolder))
+          os.mkdir(dst_ffolder)
+        stats["files_moved"] = stats["files_moved"] + 1
+        if args.test:
+          logger.info("would move: {} -> {}".format(ff_src, ff_dst))
+        else:
+          logger.info("moving: {} -> {}".format(ff_src, ff_dst))
+          shutil.move(ff_src, ff_dst)
+
     #
     ## clean operation needs to kill after
     logger.info(stats)
